@@ -628,16 +628,11 @@ this.timer = null;
 
     // ========== DI CHUYỂN VÀ ĂN QUÂN ==========
     
-    diChuyenQuanCo(hangDich, cotDich, isRemote = false) {
+    diChuyenQuanCo(hangDich, cotDich) {
         if (!this.selectedPiece) {
             console.log("❌ Không có quân được chọn!");
             return;
         }
-        // Chặn đi sai lượt trong online
-if (!isRemote && window.myRole && this.currentPlayer !== window.myRole) {
-    this.hienThiThongBao("⚠️ Chưa tới lượt bạn!", "warning");
-    return;
-}
         
         const hangDau = this.selectedPiece.hang;
         const cotDau = this.selectedPiece.cot;
@@ -715,23 +710,7 @@ if (!isRemote && window.myRole && this.currentPlayer !== window.myRole) {
             remainingPiece.remove();
             this.activePieces = this.activePieces.filter(p => p.element !== remainingPiece);
         }
-        // ===== GỬI NƯỚC ĐI ONLINE =====
-// ===== GỬI NƯỚC ĐI ONLINE =====
-if (!isRemote && window.currentRoom) {
-
-    const from = {
-        hang: hangDau,
-        cot: cotDau
-    };
-
-    const to = {
-        hang: hangDich,
-        cot: cotDich
-    };
-
-    broadcastMove(from, to);
-
-}
+        
         // Thêm quân vào ô đích
         oCoDich.appendChild(quanCo);
         
@@ -1020,7 +999,6 @@ if (!isRemote && window.currentRoom) {
         this.moveHistory.push(move);
         this.capNhatLichSu();
     }
-    
     // ========== CẬP NHẬT HIỂN THỊ ==========
     
     capNhatHienThi() {
@@ -2067,44 +2045,24 @@ window.startPvE = function(level = 3, color = 'black') {
 };
 
 const socket = io();
-socket.on("connect", () => {
-    console.log("✅ Đã kết nối server:", socket.id);
-});
-
-socket.on("disconnect", () => {
-    console.log("❌ Mất kết nối server");
-});
-
 
 let myRole = null;
 let currentRoom = null;
 
 function joinGameRoom() {
 
-    const code = document.getElementById("roomCode").value.trim();
+    const code = document.getElementById("roomCode").value;
 
-    if (!code) {
-        alert("Nhập mã phòng!");
-        return;
-    }
-
-    if (!socket.connected) {
-        alert("Chưa kết nối server!");
-        return;
-    }
+    if (!code) return;
 
     currentRoom = code;
-    window.currentRoom = code;
 
     socket.emit("join-room", code);
-
-    console.log("Đã join phòng:", code);
 }
 
 socket.on("joined", (data) => {
 
     myRole = data.role;
-    window.myRole = data.role;
 
     alert(`Bạn là quân ${myRole === "red" ? "ĐỎ (đi trước)" : "ĐEN"}`);
 
@@ -2112,49 +2070,31 @@ socket.on("joined", (data) => {
 
 socket.on("opponent-move", (move) => {
 
-    console.log("♟ Đối thủ đi:", move);
+    console.log("Đối thủ đi:", move);
 
-    if (!window.coTuongGame) return;
-
-    const game = window.coTuongGame;
-
-    const quan = game.layQuanTai(move.from.hang, move.from.cot);
-    if (!quan) return;
-
-    game.selectedPiece = {
-        element: quan,
-        loai: quan.dataset.loai,
-        mau: quan.dataset.mau,
-        hang: move.from.hang,
-        cot: move.from.cot
-    };
-
-    game.validMoves = [{
-        hang: move.to.hang,
-        cot: move.to.cot,
-        laAnQuan: !!game.layQuanTai(move.to.hang, move.to.cot)
-    }];
-
-    // Di chuyển quân (true = từ server)
-    game.diChuyenQuanCo(move.to.hang, move.to.cot, true);
+    if (window.coTuongGame) {
+        window.coTuongGame.move(move.from, move.to);
+    }
 
 });
 
 function broadcastMove(from, to) {
 
-    if (!currentRoom) {
-        console.log("❌ Chưa vào phòng");
-        return;
-    }
-
-    console.log("📡 Gửi nước:", from, to);
+    if (!currentRoom) return;
 
     socket.emit("move", {
         roomId: currentRoom,
-        move: {
-            from: from,
-            to: to
-        }
+        move: { from, to }
     });
+
+}
+
+function playerMove(from, to) {
+
+    if (!window.coTuongGame) return;
+
+    window.coTuongGame.move(from, to);
+
+    broadcastMove(from, to);
 
 }

@@ -233,13 +233,32 @@
 
 
         <!-- Game Area -->
-       <div class="game-mode-selector">
-    <button class="mode-btn active" data-mode="online" onclick="changeGameMode('online')">
-        <i class="fas fa-globe"></i> Online
-    </button>
-</div>
+        <section class="game-area">
+            <!-- Game Mode Selector -->
+            <div class="game-mode-selector">
+                <button class="mode-btn active" data-mode="ai" onclick="changeGameMode('ai')">
+                    <i class="fas fa-robot"></i> Đấu với AI
+                </button>
+                <button class="mode-btn" data-mode="local" onclick="changeGameMode('local')">
+                    <i class="fas fa-users"></i> 2 Người
+                </button>
+                <button class="mode-btn" data-mode="online" onclick="changeGameMode('online')">
+                    <i class="fas fa-globe"></i> Online
+                </button>
+            </div>
             
-           
+            <!-- AI Level Selector (only show when AI mode) -->
+            <div class="ai-level-selector" id="aiLevelSelector">
+                <h4><i class="fas fa-brain"></i> Cấp độ AI</h4>
+                <div class="level-buttons">
+                   <button class="ai-level-btn active" data-level="1">Dễ</button>
+                    <button class="ai-level-btn" data-level="2">TB</button>
+                    <button class="ai-level-btn" data-level="3">Khá</button>
+                    <button class="ai-level-btn" data-level="4">Khó</button>
+                    <button class="ai-level-btn" data-level="5">Cao thủ</button>
+
+                </div>
+            </div>
             
             <!-- Online Matchmaking (only show when Online mode) -->
             <div class="matchmaking-panel" id="matchmakingPanel">
@@ -257,11 +276,17 @@
                     <i class="fas fa-times"></i> Hủy
                 </button>
 
-                        <div class="online-controls" style="margin-bottom: 10px;">
-    <input type="text" id="roomCode" placeholder="Nhập mã phòng...">
-    <button onclick="joinGameRoom()" class="btn btn-primary">Vào/Tạo Phòng</button>
-</div>
+                       <div class="online-room">
 
+    <input type="text" id="roomCode" placeholder="Nhập mã phòng...">
+
+    <button onclick="joinGameRoom()" class="btn btn-primary">
+        Vào/Tạo Phòng
+    </button>
+
+    <div id="roomInfo"></div>
+
+</div>
 
             </div>
 

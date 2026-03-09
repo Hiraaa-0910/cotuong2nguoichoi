@@ -1072,9 +1072,55 @@ p {
     z-index: 9999;
     pointer-events: auto;
 }
-#chessBoard {
-    position: relative;
-    z-index: 1;
+#chessBoard{
+    width:540px;
+    height:600px;
+
+    display:grid;
+
+    grid-template-columns:repeat(9,60px);
+    grid-template-rows:repeat(10,60px);
+
+    background:#d9a45b;
+    border:4px solid #8b4513;
+
+    margin:auto;
+}
+.board-square{
+    width:60px;
+    height:60px;
+
+    border:1px solid rgba(0,0,0,0.2);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    position:relative;
+}
+.piece{
+    width:50px;
+    height:50px;
+
+    border-radius:50%;
+    background:#f5e6c8;
+    border:2px solid #333;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:26px;
+    font-weight:bold;
+
+    cursor:pointer;
+}
+.piece.red{
+    color:#c0392b;
+}
+
+.piece.black{
+    color:#111;
 }
 /* ===== FIX KHÔNG CLICK ĐƯỢC BUTTON ===== */
 button,
