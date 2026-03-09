@@ -31,19 +31,27 @@ class OnlineSystem {
 
     });
 }
-    joinRoom(roomId) {
-        this.roomId = roomId;
+   joinRoom(roomId) {
 
-        this.socket.emit("join-room", roomId);
-
-        this.socket.on("joined", (data) => {
-            console.log("Joined room:", data);
-        });
-
-        this.socket.on("player-ready", () => {
-            console.log("Game start!");
-        });
+    if (!this.socket) {
+        console.log("Socket chưa kết nối");
+        return;
     }
+
+    this.roomId = roomId;
+
+    this.socket.emit("join-room", roomId);
+
+    this.socket.off("joined");
+    this.socket.on("joined", (data) => {
+        console.log("Joined room:", data);
+    });
+
+    this.socket.off("player-ready");
+    this.socket.on("player-ready", () => {
+        console.log("Game start!");
+    });
+}
 
     sendMove(move) {
         if (!this.socket) return;
@@ -91,9 +99,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         await onlineSystem.connect();
 
-        // cho 2 người vào cùng phòng
-        onlineSystem.joinRoom("room1");
-
         console.log("Online ready");
 
     } catch (err) {
@@ -103,3 +108,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 });
+function joinGameRoom() {
+
+    const roomCode = document.getElementById("roomCode").value.trim();
+
+    if (!roomCode) {
+        alert("Nhập mã phòng!");
+        return;
+    }
+
+    if (!onlineSystem.isConnected) {
+        alert("Chưa kết nối server!");
+        return;
+    }
+
+    onlineSystem.joinRoom(roomCode);
+
+    console.log("Join room:", roomCode);
+}
