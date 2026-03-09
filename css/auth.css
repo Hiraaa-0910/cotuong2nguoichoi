@@ -1,0 +1,338 @@
+/* ========== AUTHENTICATION STYLES ========== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    animation: fadeIn var(--transition-normal);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, var(--dark-bg), var(--darker-bg));
+    padding: 40px;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    border: 3px solid var(--primary-gold);
+    position: relative;
+    box-shadow: var(--shadow-heavy);
+    animation: slideIn var(--transition-normal);
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 28px;
+    color: var(--accent-red);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all var(--transition-normal);
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.close-modal:hover {
+    background: rgba(231, 76, 60, 0.2);
+    transform: rotate(90deg);
+}
+
+.modal h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--text-light);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: var(--text-light);
+    font-size: 1rem;
+    transition: all var(--transition-normal);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+
+.form-group input::placeholder {
+    color: var(--text-muted);
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.form-options a {
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color var(--transition-normal);
+}
+
+.form-options a:hover {
+    color: var(--primary-gold);
+    text-decoration: underline;
+}
+
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Error Messages */
+.error-message {
+    color: var(--accent-red);
+    font-size: 0.85rem;
+    margin-top: 5px;
+    min-height: 20px;
+    display: none;
+}
+
+.form-group .error {
+    border-color: var(--accent-red);
+    background: rgba(231, 76, 60, 0.1);
+}
+
+/* Password Strength */
+.password-strength {
+    margin-top: 10px;
+}
+
+.strength-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    transition: width var(--transition-normal), background-color var(--transition-normal);
+}
+
+.strength-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Password strength levels */
+.password-strength[data-strength="0"] .strength-fill {
+    width: 20%;
+    background: var(--accent-red);
+}
+
+.password-strength[data-strength="1"] .strength-fill {
+    width: 40%;
+    background: #ff9e6d;
+}
+
+.password-strength[data-strength="2"] .strength-fill {
+    width: 60%;
+    background: #ffd166;
+}
+
+.password-strength[data-strength="3"] .strength-fill {
+    width: 80%;
+    background: #06d6a0;
+}
+
+.password-strength[data-strength="4"] .strength-fill {
+    width: 100%;
+    background: var(--accent-green);
+}
+
+/* Result Modal */
+.result-modal .modal-content {
+    max-width: 400px;
+    text-align: center;
+}
+
+.result-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    color: var(--primary-gold);
+}
+
+.result-message {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: var(--primary-gold);
+    font-weight: bold;
+}
+
+.result-details {
+    color: var(--text-muted);
+    margin-bottom: 30px;
+    font-size: 1rem;
+}
+
+.result-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 30px 0;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--border-radius);
+}
+
+.result-stats .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.result-stats .stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-gold);
+}
+
+.result-stats .stat-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+.result-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* Tournament Modal */
+.tournament-modal .modal-content {
+    max-width: 1000px;
+}
+
+.tournament-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.tournament-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    border: 1px solid var(--border-gold);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.tournament-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-gold);
+    box-shadow: var(--shadow-glow);
+}
+
+.tournament-card.featured {
+    border: 2px solid var(--primary-gold);
+    background: linear-gradient(135deg, 
+        rgba(139, 0, 0, 0.1) 0%, 
+        rgba(255, 215, 0, 0.1) 100%);
+}
+
+.tournament-prize {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, var(--primary-gold), #FFA500);
+    color: var(--primary-red);
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.tournament-card h4 {
+    color: var(--primary-gold);
+    margin-bottom: 10px;
+}
+
+.tournament-card p {
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.tournament-card .btn {
+    margin-top: 15px;
+    width: 100%;
+}
+
+/* User profile chevron and dropdown positioning */
+.user-profile {
+    cursor: pointer;
+    position: relative; /* keep menu positioned relative to profile */
+}
+
+.user-profile .fa-chevron-down {
+    transition: transform 200ms ease;
+    margin-left: 8px;
+}
+
+.user-profile.open .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
