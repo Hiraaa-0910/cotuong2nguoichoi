@@ -2,17 +2,13 @@ const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
 const { Server } = require("socket.io");
+const path = require("path");
 
 const io = new Server(http, {
     cors: {
         origin: "*"
     }
 });
-
-const path = require("path");
-
-// lưu trạng thái phòng
-let rooms = {};
 
 app.use(express.static(path.join(__dirname, "../")));
 
@@ -24,56 +20,59 @@ io.on("connection", (socket) => {
 
     console.log("Player connected:", socket.id);
 
-    // ================= JOIN ROOM =================
-   socket.on("join-room", (roomId) => {
+    // ===== JOIN ROOM =====
+    socket.on("join-room", (roomId) => {
 
-    roomId = String(roomId).trim();
+        roomId = String(roomId).trim();
 
-    console.log("Join request:", roomId);
+        console.log("Join request:", roomId);
 
-    const room = io.sockets.adapter.rooms.get(roomId);
-    const numClients = room ? room.size : 0;
+        const room = io.sockets.adapter.rooms.get(roomId);
+        const numClients = room ? room.size : 0;
 
-    console.log("Players in room:", numClients);
+        console.log("Players in room:", numClients);
 
-    if (numClients === 0) {
+        if (numClients === 0) {
 
-        socket.join(roomId);
+            socket.join(roomId);
 
-        socket.emit("joined", {
-            roomId: roomId,
-            role: "red"
-        });
+            socket.emit("joined", {
+                role: "red",
+                roomId: roomId
+            });
 
-        console.log("Player 1 joined");
+            console.log("Player RED joined room", roomId);
 
-    }
-    else if (numClients === 1) {
+        }
+        else if (numClients === 1) {
 
-        socket.join(roomId);
+            socket.join(roomId);
 
-        socket.emit("joined", {
-            roomId: roomId,
-            role: "black"
-        });
+            socket.emit("joined", {
+                role: "black",
+                roomId: roomId
+            });
 
-        io.to(roomId).emit("player-ready");
+            console.log("Player BLACK joined room", roomId);
 
-        console.log("Player 2 joined");
+            // bắt đầu game
+            io.to(roomId).emit("player-ready");
 
-    }
-    else {
+        }
+        else {
 
-        socket.emit("full", "Phòng đã đầy!");
+            socket.emit("full");
 
-    }
+            console.log("Room full:", roomId);
 
-});
+        }
 
-    // ================= MOVE =================
+    });
+
+    // ===== MOVE =====
     socket.on("move", (data) => {
 
-        if (!data.roomId) return;
+        if (!data || !data.roomId) return;
 
         console.log("Move:", data);
 
@@ -81,31 +80,10 @@ io.on("connection", (socket) => {
 
     });
 
-    // ================= CHAT =================
-    socket.on("chat", (data) => {
-
-        if (!data.roomId) return;
-
-        socket.to(data.roomId).emit("chat", data.message);
-
-    });
-
-    // ================= DISCONNECT =================
+    // ===== DISCONNECT =====
     socket.on("disconnect", () => {
 
         console.log("Player disconnected:", socket.id);
-
-        for (let roomId in rooms) {
-
-            rooms[roomId] = rooms[roomId].filter(id => id !== socket.id);
-
-            if (rooms[roomId].length === 0) {
-                delete rooms[roomId];
-            } else {
-                io.to(roomId).emit("opponent-left");
-            }
-
-        }
 
     });
 
