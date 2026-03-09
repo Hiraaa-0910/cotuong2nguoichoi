@@ -55,7 +55,7 @@ io.on("connection", (socket) => {
 
             console.log("Player BLACK joined room", roomId);
 
-            // bắt đầu game
+            // thông báo cả phòng bắt đầu game
             io.to(roomId).emit("player-ready");
 
         }
@@ -69,14 +69,15 @@ io.on("connection", (socket) => {
 
     });
 
-    // ===== MOVE =====
+    // ===== MOVE PIECE =====
     socket.on("move", (data) => {
 
         if (!data || !data.roomId) return;
 
-        console.log("Move:", data);
+        console.log("Move received:", data);
 
-        socket.to(data.roomId).emit("opponent-move", data.move);
+        // gửi nước đi cho đối thủ
+        socket.to(data.roomId).emit("opponent-move", data);
 
     });
 
@@ -84,6 +85,8 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
 
         console.log("Player disconnected:", socket.id);
+
+        socket.broadcast.emit("player-disconnected");
 
     });
 

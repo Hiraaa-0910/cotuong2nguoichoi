@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-window.gameMode = null; // 'ai' | '2p' | 'online'
+window.gameMode = "online";
 window.isGameStarted = false;
 
 
@@ -360,7 +360,7 @@ setInterval(() => {
 
 // ========== GAME MODE FUNCTIONS ==========
 
-let gameMode = "online";  // Default mode
+
 
 
 // ========== LOG ==========

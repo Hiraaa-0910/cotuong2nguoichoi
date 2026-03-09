@@ -21,7 +21,6 @@ class OnlineSystem {
             this.socket.on("connect", () => {
 
                 console.log("Connected to server:", this.socket.id);
-
                 this.isConnected = true;
 
                 resolve(true);
@@ -31,18 +30,23 @@ class OnlineSystem {
             this.socket.on("connect_error", (err) => {
 
                 console.log("Connect error:", err);
-
                 reject(false);
 
             });
 
-            // nhận nước đi từ đối thủ
-            this.socket.on("opponent-move", (move) => {
+            // ===== nhận nước đi từ đối thủ =====
+            this.socket.on("opponent-move", (data) => {
 
-                console.log("Opponent move:", move);
+                console.log("Opponent move:", data);
 
-                if (window.coTuongGame) {
-                    window.coTuongGame.makeMove(move);
+                if (!window.coTuongGame) return;
+
+                // server có thể gửi {roomId, move}
+                if (data.move) {
+                    window.coTuongGame.makeMove(data.move);
+                }
+                else {
+                    window.coTuongGame.makeMove(data);
                 }
 
             });
@@ -55,22 +59,18 @@ class OnlineSystem {
     joinRoom(roomId) {
 
         if (!this.socket || !this.isConnected) {
-
             console.log("Socket chưa kết nối");
-
             return;
-
         }
 
         roomId = String(roomId).trim();
-
         this.roomId = roomId;
 
         console.log("Join room:", roomId);
 
         this.socket.emit("join-room", roomId);
 
-        // khi join thành công
+        // ===== join thành công =====
         this.socket.off("joined");
 
         this.socket.on("joined", (data) => {
@@ -83,45 +83,37 @@ class OnlineSystem {
 
         });
 
-        // khi đủ 2 người
+        // ===== đủ 2 người =====
         this.socket.off("player-ready");
 
-       this.socket.on("player-ready", () => {
+        this.socket.on("player-ready", () => {
 
-    console.log("Đối thủ đã vào phòng");
+            console.log("Đối thủ đã vào phòng");
 
-    // cập nhật thông tin phòng
-    const info = document.getElementById("roomInfo");
-    if (info) {
-        info.innerText = "Đối thủ đã vào phòng!";
-    }
+            const info = document.getElementById("roomInfo");
+            if (info) info.innerText = "Đối thủ đã vào phòng!";
 
-    // đổi tên đối thủ
-    const opponent = document.getElementById("opponentName");
-    if (opponent) {
-        opponent.innerText = "Người chơi Online";
-    }
+            const opponent = document.getElementById("opponentName");
+            if (opponent) opponent.innerText = "Người chơi Online";
 
-    // tắt AI và chuyển sang online
-    if (window.game) {
+            if (window.coTuongGame) {
 
-    window.game.isOnline = true;
-    window.game.vsAI = false;
+                window.coTuongGame.isOnline = true;
+                window.coTuongGame.vsAI = false;
 
-    if (window.game.resetGame) {
-        window.game.resetGame();
-    }
+                if (window.coTuongGame.resetGame) {
+                    window.coTuongGame.resetGame();
+                }
 
-}
+            }
 
-});
-        // phòng đầy
+        });
+
+        // ===== phòng đầy =====
         this.socket.off("full");
 
         this.socket.on("full", () => {
-
             alert("Phòng đã đầy!");
-
         });
 
     }
@@ -131,25 +123,11 @@ class OnlineSystem {
 
         if (!this.socket || !this.roomId) return;
 
-        this.socket.emit("move", {
+        console.log("Send move:", move);
 
+        this.socket.emit("move", {
             roomId: this.roomId,
             move: move
-
-        });
-
-    }
-
-    // ================= CHAT =================
-    sendChatMessage(message) {
-
-        if (!this.socket || !this.roomId) return;
-
-        this.socket.emit("chat", {
-
-            roomId: this.roomId,
-            message: message
-
         });
 
     }
@@ -158,9 +136,7 @@ class OnlineSystem {
     disconnect() {
 
         if (this.socket) {
-
             this.socket.disconnect();
-
         }
 
         this.socket = null;
@@ -183,7 +159,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
 
         await onlineSystem.connect();
-
         console.log("Online ready");
 
     }
@@ -202,19 +177,13 @@ function joinGameRoom() {
     const roomCode = document.getElementById("roomCode").value.trim();
 
     if (!roomCode) {
-
         alert("Nhập mã phòng!");
-
         return;
-
     }
 
     if (!onlineSystem.isConnected) {
-
         alert("Chưa kết nối server!");
-
         return;
-
     }
 
     onlineSystem.joinRoom(roomCode);
