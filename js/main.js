@@ -1,16 +1,7 @@
 // ========== CỜ TƯỚNG ONLINE - MAIN.JS ==========
 // Updated: January 23, 2026
 
-document.addEventListener('DOMContentLoaded', () => {
 
-    console.log("🎮 Khởi tạo CoTuongGame...");
-
-    if (!window.coTuongGame) {
-        window.coTuongGame = new CoTuongHoanChinh();
-        console.log("✅ CoTuongGame đã tạo thành công");
-    }
-
-});
 
 
 // ========== TOASTR CONFIGURATION ==========
@@ -74,23 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('❌ Critical initialization error:', error);
     }
 });
-document.addEventListener('DOMContentLoaded', () => {
-    const aiButtons = document.querySelectorAll('.ai-level-btn');
 
-    aiButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            aiButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            window.selectedAILevel = parseInt(btn.dataset.level);
-
-            console.log("🤖 Selected AI level:", window.selectedAILevel);
-            
-            // Automatically start AI match when level is selected
-            startAIMatch();
-        });
-    });
-});
 window.gameMode = null; // 'ai' | '2p' | 'online'
 window.isGameStarted = false;
 
@@ -330,48 +305,7 @@ function getPieceName(piece) {
     };
     return names[piece] || piece;
 }
-window.selectedAILevel = 1;
 
-function startAIMatch() {
-    if (!window.coTuongGame) {
-        alert("❌ Game chưa sẵn sàng");
-        console.error("❌ coTuongGame is not initialized");
-        return;
-    }
-
-    console.log("🎮 Starting AI Match with level:", window.selectedAILevel);
-    
-    // Reset the game
-    coTuongGame.resetGame();
-    
-    // Configure AI mode
-    coTuongGame.playWithAI = true;
-    coTuongGame.aiColor = 'black';      // AI plays as black (bottom side)
-    coTuongGame.playerColor = 'red';    // Player plays as red (top side)
-    coTuongGame.aiLevel = window.selectedAILevel || 1;
-    coTuongGame.currentPlayer = 'red';  // Red moves first (player)
-
-    // Update UI
-    const blackPlayerName = document.getElementById('blackPlayerName');
-    if (blackPlayerName) {
-        blackPlayerName.textContent = `AI Cấp ${coTuongGame.aiLevel} (ĐEN)`;
-    }
-
-    const gameModeDisplay = document.getElementById('gameModeDisplay');
-    if (gameModeDisplay) {
-        gameModeDisplay.innerHTML = `<i class="fas fa-robot"></i> Đấu AI - Cấp ${coTuongGame.aiLevel}`;
-    }
-
-    console.log(`✅ AI Match Started`);
-    console.log(`   - Player (RED): Cấp độ người chơi`);
-    console.log(`   - AI (BLACK): Cấp độ ${coTuongGame.aiLevel}`);
-    console.log(`   - RED moves first`);
-    
-    // Start the game timer
-    
-    
-    showNotification(`🤖 Bắt đầu chơi với AI Cấp ${coTuongGame.aiLevel}!`, 'success');
-}
 
 
 
@@ -426,7 +360,7 @@ setInterval(() => {
 
 // ========== GAME MODE FUNCTIONS ==========
 
-let gameMode = 'ai';  // Default mode
+let gameMode = "online";  // Default mode
 
 
 // ========== LOG ==========
@@ -457,9 +391,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 .forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
-            if (mode === 'ai') startAIMatch();
-            if (mode === 'local') startLocalGame();
-            if (mode === 'online') startOnlineGame();
+           if (mode === 'local') startLocalGame();
+if (mode === 'online') startOnlineGame();
         });
     });
 });
@@ -471,9 +404,20 @@ function startLocalGame() {
 }
 
 function startOnlineGame() {
-    showNotification("🌐 Online đang mô phỏng", "info");
+
+    if (!window.coTuongGame) {
+        alert("Game chưa sẵn sàng");
+        return;
+    }
+
+    coTuongGame.playWithAI = false;
+    coTuongGame.resetGame();
+
+    showNotification("🌐 Chế độ Online", "success");
+
 }
 function changeGameMode(mode) {
+
     gameMode = mode;
 
     document.querySelectorAll('.mode-btn')
@@ -481,9 +425,6 @@ function changeGameMode(mode) {
 
     document.querySelector(`[data-mode="${mode}"]`)
         ?.classList.add('active');
-
-    document.getElementById('aiLevelSelector').style.display =
-        mode === 'ai' ? 'block' : 'none';
 
     document.getElementById('matchmakingPanel').style.display =
         mode === 'online' ? 'block' : 'none';

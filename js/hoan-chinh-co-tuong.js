@@ -628,11 +628,16 @@ this.timer = null;
 
     // ========== DI CHUYỂN VÀ ĂN QUÂN ==========
     
-    diChuyenQuanCo(hangDich, cotDich) {
+    diChuyenQuanCo(hangDich, cotDich, isRemote = false) {
         if (!this.selectedPiece) {
             console.log("❌ Không có quân được chọn!");
             return;
         }
+        // Chặn đi sai lượt trong online
+if (!isRemote && window.myRole && this.currentPlayer !== window.myRole) {
+    this.hienThiThongBao("⚠️ Chưa tới lượt bạn!", "warning");
+    return;
+}
         
         const hangDau = this.selectedPiece.hang;
         const cotDau = this.selectedPiece.cot;
@@ -710,7 +715,23 @@ this.timer = null;
             remainingPiece.remove();
             this.activePieces = this.activePieces.filter(p => p.element !== remainingPiece);
         }
-        
+        // ===== GỬI NƯỚC ĐI ONLINE =====
+// ===== GỬI NƯỚC ĐI ONLINE =====
+if (!isRemote && window.currentRoom) {
+
+    const from = {
+        hang: hangDau,
+        cot: cotDau
+    };
+
+    const to = {
+        hang: hangDich,
+        cot: cotDich
+    };
+
+    broadcastMove(from, to);
+
+}
         // Thêm quân vào ô đích
         oCoDich.appendChild(quanCo);
         
@@ -2046,63 +2067,94 @@ window.startPvE = function(level = 3, color = 'black') {
 };
 
 const socket = io();
-let myRole = null; // 'red' hoặc 'black'
+socket.on("connect", () => {
+    console.log("✅ Đã kết nối server:", socket.id);
+});
+
+socket.on("disconnect", () => {
+    console.log("❌ Mất kết nối server");
+});
+
+
+let myRole = null;
 let currentRoom = null;
 
 function joinGameRoom() {
-    const code = document.getElementById('roomCode').value;
-    if (code) {
-        currentRoom = code;
-        socket.emit('join-room', code);
+
+    const code = document.getElementById("roomCode").value.trim();
+
+    if (!code) {
+        alert("Nhập mã phòng!");
+        return;
     }
+
+    if (!socket.connected) {
+        alert("Chưa kết nối server!");
+        return;
+    }
+
+    currentRoom = code;
+    window.currentRoom = code;
+
+    socket.emit("join-room", code);
+
+    console.log("Đã join phòng:", code);
 }
 
-socket.on('joined', (data) => {
+socket.on("joined", (data) => {
+
     myRole = data.role;
-    alert(`Bạn là quân ${myRole === 'red' ? 'Đỏ (đi trước)' : 'Đen'}`);
+    window.myRole = data.role;
+
+    alert(`Bạn là quân ${myRole === "red" ? "ĐỎ (đi trước)" : "ĐEN"}`);
+
 });
 
-socket.on('opponent-move', (move) => {
-    console.log("Đối thủ đi:", move);
-    // Ở đây bạn gọi hàm thực hiện nước đi có sẵn trong chess-game.js của bạn
-    // Ví dụ: makeMove(move.from, move.to);
+socket.on("opponent-move", (move) => {
+
+    console.log("♟ Đối thủ đi:", move);
+
+    if (!window.coTuongGame) return;
+
+    const game = window.coTuongGame;
+
+    const quan = game.layQuanTai(move.from.hang, move.from.cot);
+    if (!quan) return;
+
+    game.selectedPiece = {
+        element: quan,
+        loai: quan.dataset.loai,
+        mau: quan.dataset.mau,
+        hang: move.from.hang,
+        cot: move.from.cot
+    };
+
+    game.validMoves = [{
+        hang: move.to.hang,
+        cot: move.to.cot,
+        laAnQuan: !!game.layQuanTai(move.to.hang, move.to.cot)
+    }];
+
+    // Di chuyển quân (true = từ server)
+    game.diChuyenQuanCo(move.to.hang, move.to.cot, true);
+
 });
 
-// Hàm này bạn gọi mỗi khi bạn kéo thả quân cờ xong
 function broadcastMove(from, to) {
-    if (currentRoom) {
-        socket.emit('move', {
-            roomId: currentRoom,
-            move: { from, to }
-        });
-    }
-}
 
-// Hàm gửi nước đi lên server
-function broadcastMove(from, to) {
-    if (currentRoom && myRole) {
-        socket.emit('move', {
-            roomId: currentRoom,
-            move: { from: from, to: to }
-        });
+    if (!currentRoom) {
+        console.log("❌ Chưa vào phòng");
+        return;
     }
-}
 
-// Cập nhật lại phần lắng nghe nước đi từ đối thủ
-socket.on('opponent-move', (move) => {
-    console.log("Đối thủ vừa đi:", move);
-    // GỌI HÀM DI CHUYỂN CỜ CỦA BẠN TẠI ĐÂY
-    // Ví dụ: window.coTuongGame.move(move.from, move.to);
-    // Bạn cần kiểm tra tên hàm di chuyển chính xác trong chess-game.js
-});
-// Tìm hàm xử lý khi bắt đầu chọn quân cờ để đi
-function onDragStart(event) {
-    if (currentRoom) {
-        const pieceColor = event.target.getAttribute('data-color'); // Ví dụ lấy màu quân
-        if (pieceColor !== myRole) {
-            console.log("Không phải lượt của bạn hoặc không đúng màu quân!");
-            return false; // Ngăn không cho kéo quân
+    console.log("📡 Gửi nước:", from, to);
+
+    socket.emit("move", {
+        roomId: currentRoom,
+        move: {
+            from: from,
+            to: to
         }
-    }
-   
+    });
+
 }
