@@ -1,13 +1,16 @@
 // ========== ONLINE MULTIPLAYER SYSTEM ==========
 
 class OnlineSystem {
+    
 
-    constructor() {
+    constructor()
+     {
         this.socket = null;
         this.roomId = null;
         this.role = null;
         this.isConnected = false;
     }
+    
 
     // ================= CONNECT =================
     connect() {
@@ -35,21 +38,22 @@ class OnlineSystem {
             });
 
             // ===== nhận nước đi từ đối thủ =====
-            this.socket.on("opponent-move", (data) => {
+           this.socket.on("opponent-move", (data) => {
 
-                console.log("Opponent move:", data);
+    console.log("Opponent move:", data);
 
-                if (!window.coTuongGame) return;
+    if (!window.coTuongGame) return;
 
-                // server có thể gửi {roomId, move}
-                if (data.move) {
-                    window.coTuongGame.makeMove(data.move);
-                }
-                else {
-                    window.coTuongGame.makeMove(data);
-                }
+    const move = data.move ? data.move : data;
 
-            });
+    window.coTuongGame.diChuyenQuanCo(
+        move.from.r,
+        move.from.c,
+        move.to.r,
+        move.to.c
+    );
+
+});
 
         });
 
@@ -75,13 +79,18 @@ class OnlineSystem {
 
         this.socket.on("joined", (data) => {
 
-            console.log("Joined room:", data);
+    console.log("Joined room:", data);
 
-            this.role = data.role;
+    this.role = data.role;
 
-            alert("Bạn là: " + this.role);
+    alert("Bạn là: " + this.role);
 
-        });
+    // Gửi role cho game engine
+    if (window.coTuongGame) {
+        window.coTuongGame.myRole = data.role;
+    }
+
+});
 
         // ===== đủ 2 người =====
         this.socket.off("player-ready");

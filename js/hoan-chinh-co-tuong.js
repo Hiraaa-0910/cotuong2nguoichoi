@@ -3,7 +3,10 @@
 class CoTuongHoanChinh {
     constructor() {
         console.log("🚀 Khởi tạo Cờ Tướng Hoàn Chỉnh...");
-         this.socket = io("https://cotuong2nguoichoi.onrender.com")
+         this.onlineSystem = null;  // Sẽ được gán từ main.js
+    this.isOnline = false;     // Đánh dấu đang chơi online
+    this.myRole = null;        // Vai trò của mình: 'red' hoặc 'black'
+     
         
         // Game state
         this.boardElement = document.getElementById('chessBoard');
@@ -302,6 +305,42 @@ this.timer = null;
     // Hiển thị thông tin quân
     const tenQuan = this.pieceNames[quanCo.dataset.loai];
     console.log(`✅ Đã chọn: ${tenQuan} tại [${hang},${cot}]`);
+}
+// ========== XỬ LÝ NƯỚC ĐI TỪ ONLINE ==========
+makeMove(moveData) {
+    console.log("📨 Nhận nước đi từ đối thủ:", moveData);
+    
+    // Lấy thông tin nước đi
+    const fromR = moveData.from.r;
+    const fromC = moveData.from.c;
+    const toR = moveData.to.r;
+    const toC = moveData.to.c;
+    
+    // Tìm quân tại vị trí nguồn
+    const fromPiece = this.layQuanTai(fromR, fromC);
+    if (!fromPiece) {
+        console.error("❌ Không tìm thấy quân tại", fromR, fromC);
+        return;
+    }
+    
+    // Chọn quân
+    this.selectedPiece = {
+        element: fromPiece,
+        loai: fromPiece.dataset.loai,
+        mau: fromPiece.dataset.mau,
+        hang: fromR,
+        cot: fromC
+    };
+    
+    // Thiết lập nước đi hợp lệ
+    this.validMoves = [{
+        hang: toR,
+        cot: toC,
+        laAnQuan: !!this.layQuanTai(toR, toC)
+    }];
+    
+    // Di chuyển quân
+    this.diChuyenQuanCo(toR, toC);
 }
     // ========== TÍNH TOÁN NƯỚC ĐI HỢP LỆ ==========
     
@@ -670,6 +709,7 @@ this.timer = null;
             return;
         }
         
+        
         // XỬ LÝ ĂN QUÂN TRƯỚC KHI DI CHUYỂN - LẤY QUÂN FRESH TỪ DOM
        if (nuocDi.laAnQuan) {
     const capturedPiece = this.layQuanTai(hangDich, cotDich);
@@ -697,6 +737,7 @@ this.timer = null;
 } else {
     this.playSound('move');
 }
+
 
         // Xóa quân khỏi ô đầu
         if (quanCo.parentNode === oCoDau) {
@@ -1887,15 +1928,20 @@ hienThiKetQua(nguoiThang) {
 
 // ========== KHỞI TẠO GAME =========
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
+
     console.log("🎮 Khởi động Cờ Tướng Online...");
 
-    if (!window.coTuongGame) {
-        window.coTuongGame = new CoTuongHoanChinh();
-    }
+    // tạo game engine
+    window.coTuongGame = new CoTuongHoanChinh();
 
     console.log("✅ Game ready:", window.coTuongGame);
+
+    // báo cho online biết game đã sẵn sàng
+    window.gameReady = true;
+
     console.log("✅ Cờ Tướng sẵn sàng!");
+
 });
 
 
